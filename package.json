@@ -1,0 +1,16 @@
+{
+  "name": "matchstickgame",
+  "version": "1.0.0",
+  "description": "one oral calculator application for schoolboy  \r 网页版的口算练习机，可以在手机上通过浏览器或者微信访问。适合小学生使用。",
+  "main": "env.js",
+  "scripts": {
+    "start": "parcel src/index.html",
+    "build": "parcel build src/index.html"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "parcel-bundler": "^1.12.5"
+  }
+}
