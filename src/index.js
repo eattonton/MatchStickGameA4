@@ -32,6 +32,11 @@ function Start() {
 
     //添加事件
     SetupBtnClick('btn1',()=>{CreateA4(1);});
+    SetupBtnClick('btn2',()=>{CreateA4(2);});
+    SetupBtnClick('btn3',()=>{CreateA4(1,2);});
+    SetupBtnClick('btn4',()=>{CreateA4(1,1,2);});
+    SetupBtnClick('btn5',()=>{CreateA4(2,1,2);});
+    SetupBtnClick('btn6',()=>{CreateA4(1,2,2);});
 }
 
 function SetupCanvas(canvas) {
@@ -82,45 +87,240 @@ function WriteText(str1, x, y, hei, scale) {
 }
 
 var m_hard = 1;
-
+var m_mode = 1;
+var m_move = 1;   //移动次数
 //生成题目
-function CreateA4(hard){
-    console.log("create "+hard);
+function CreateA4(hard,mode,move){
+    m_hard = hard;
+    m_mode = mode || 1;
+    m_move = move || 1;
     var toastDlg = new Toast({
         text: "生成中"
     });
     toastDlg.Show();
     TT.ctx.fillStyle = "white";
     TT.ctx.fillRect(0, 0, TT.width, TT.height);
-    console.log(TT);
     //1.title
     WriteText("移动火柴棒", 7.5, 1.5, 1.0);
     //2.sub-title
     WriteTextsH(["班级________", "姓名________", "用时________", "得分________"], 2.5, 3.5, 0.5);
 
     //生成题目
-let numA = RandomInt(0, 9);
-    let numAA = SplitNumber(numA);
-
-    let numB = RandomInt(0, 9);
-    let numBB = SplitNumber(numB);
-
-    let numC = numA + numB;
-    let numCC = SplitNumber(numC);
-
-    let arrOut = [...numAA, 10, ...numBB, 12, ...numCC];
-    //绘制公式
-    DrawFormula(arrOut, 10, 310);
-    //移动火柴棒
-    let arrNew = [...arrOut];
-    CreateAfterFormula(arrNew);
-    DrawFormula(arrNew, 10, 420);
+    for(let i=0;i<4;i++)
+    {
+        DrawOneLine(i);
+    }
+    
     //显示
     //二维码
     DrawImage(pngQr, () => {
         toastDlg.Close();
         ShowImageDlg();
     });
+}
+
+function DrawOneLine(idx){
+    let arrOut = [];
+    if(m_mode == 1){
+        arrOut = GenerationFormulaA();
+    }else if(m_mode == 2){
+        arrOut = GenerationFormulaTwo();
+    }
+ 
+    let x0 = 4.5 - (arrOut.length - 5)*0.3;
+    let y0 = 6 + idx*6;
+    WriteText("题目 "+(idx+1)+"：移动（ "+m_move+"）根火柴棒使下面的算式成立：", 2.5, y0-1.0, 0.5);
+
+    //绘制正确公式
+   // DrawFormula(arrOut, x0, y0);
+    //移动火柴棒
+    let arrNew = [...arrOut];
+    CreateAfterFormula(arrNew);
+    let hei = 1.6;
+    if(arrNew.length >= 9) hei=1.4;
+    DrawFormula(arrNew, x0, y0, 1.6);
+}
+
+function GenerationFormulaA(){
+    let numMax = 9;
+    if(m_hard == 2){
+        numMax = 99;
+    }
+    let numA = RandomInt(0, numMax);
+    let numAA = SplitNumber(numA);
+
+    let numB = RandomInt(numA, numMax);
+    let numBB = SplitNumber(numB);
+
+    let numC = numA + numB;
+    let numCC = SplitNumber(numC);
+
+    let oper = RandomInt(0,1);
+    let arrOut = [];
+    if(oper == 0){
+        //加法
+        arrOut = [...numAA, 10, ...numBB, 12, ...numCC];
+    }
+    else{
+        //减法
+        arrOut = [...numCC, 11, ...numBB, 12, ...numAA];
+    }
+
+    return arrOut;
+}
+
+function GenerationFormulaTwo(){
+    let numMax = 9;
+    if(m_hard == 2){
+        numMax = 99;
+    }
+    let numA = RandomInt(1, numMax-1);
+    let numAA = SplitNumber(numA);
+
+    let numB = RandomInt(numA, numMax);
+    let numBB = SplitNumber(numB);
+
+    let numC = numA + numB;
+    let numCC = SplitNumber(numC);
+
+    let oper = RandomInt(0, 3);
+    let arrOut = [];
+    if(oper == 0){
+        let numD = RandomInt(0,numC);
+        let numDD = SplitNumber(numD);
+        let numE = numC - numD;
+        let numEE = SplitNumber(numE);
+        //加法 = 加法
+        arrOut = [...numAA, 10, ...numBB, 12, ...numDD, 10, ...numEE];
+    } else if(oper == 1){
+        let numD = RandomInt(0,numA);
+        let numDD = SplitNumber(numD);
+        let numE = numA - numD;
+        let numEE = SplitNumber(numE);
+        //减法 = 加法
+        arrOut = [...numCC, 11, ...numBB, 12, ...numDD, 10, ...numEE];
+    }else if(oper == 2){
+        let numD = RandomInt(numC, numC+10);
+        let numDD = SplitNumber(numD);
+        let numE = numD - numC;
+        let numEE = SplitNumber(numE);
+        //加法 = 减法
+        arrOut = [...numAA, 10, ...numBB, 12, ...numDD, 11, ...numEE];
+    }else if(oper == 3){
+        let numD = RandomInt(numA, numA+10);
+        let numDD = SplitNumber(numD);
+        let numE = numD - numA;
+        let numEE = SplitNumber(numE);
+        //减法 = 减法
+        arrOut = [...numCC, 11, ...numBB, 12, ...numDD, 11, ...numEE];
+    }
+
+    return arrOut;
+}
+
+function SplitNumber(numA) {
+    let numAA = [];
+    let numAAS =  Array.from(numA.toString());
+    numAAS.forEach(item=>{
+        numAA.push(parseInt(item));
+    })
+
+    return numAA;
+}
+
+function CreateAfterFormula(theArr){
+    for(let i=0;i<10000;i++)
+    {
+        let arrIdx = GetRandQueueInRange(m_move*2,0, theArr.length-1);
+        let flag = true;
+        for(let j=0; j < m_move;j++)
+        {
+            flag = MoveOneMatchStick(theArr, [arrIdx[m_move*j], arrIdx[m_move*j + 1]]);
+            if(flag == false){
+                break;
+            }
+        }
+        
+        if(flag){
+            break;
+        }
+    }
+}
+
+function MoveOneMatchStick(theArr, arrIdx){
+    //移动一根
+    let numA = theArr[arrIdx[0]];
+    let iModes = m_DictOptr[numA];   //0 本身移动  1:增加   2:减少
+    if(iModes.length == 0) return false;
+    //获得 单个元素 所能支持的 变化
+    let idx2 = RandomInt(0, iModes.length-1);
+    let iMode = iModes[idx2];
+    if(iMode == 0){
+        //支持自身移动
+        theArr[arrIdx[0]] = GetRandQueue(m_DictSelf[numA],1)[0];
+        return true;
+    }else if(iMode == 1){
+        //支持增加
+        //第二个需要支持减少
+        let numB = theArr[arrIdx[1]];
+        let iModes2 = m_DictOptr[numB];
+        if(iModes2.includes(2) == false){
+            //不含增加 就是无效
+            return false;
+        }
+        theArr[arrIdx[0]] = GetRandQueue(m_DictPlus[numA],1)[0];
+        theArr[arrIdx[1]] = GetRandQueue(m_DictMinus[numB],1)[0];
+        return true;
+    }else if(iMode == 2){
+        //支持减少
+        //第二个需要支持增加
+        let numB = theArr[arrIdx[1]];
+        let iModes2 = m_DictOptr[numB];
+        if(iModes2.includes(1) == false){
+            //不含增加 就是无效
+            return false;
+        }
+        theArr[arrIdx[0]] = GetRandQueue(m_DictMinus[numA],1)[0];
+        theArr[arrIdx[1]] = GetRandQueue(m_DictPlus[numB],1)[0];
+        return true;
+    }
+
+    return false;
+}
+
+//绘制火柴棒算式
+function DrawFormula(iNums, DrawX, DrawY, Width, scale) {
+    scale = scale || 60;
+    DrawX = DrawX * scale;
+    DrawY = DrawY * scale;
+    let DrawWidth = Width*scale;
+    let DrawHeight = 100/60*DrawWidth;
+    iNums.forEach(iNum => {
+        if (iNum < 0) iNum = -iNum;
+        let [iPosX1, iWidth1] = GetPngPosition(iNum);
+        DrawFormulaImage(png1, [iPosX1, 0, iWidth1, 100, DrawX, DrawY, DrawWidth, DrawHeight], null);
+        DrawX += DrawWidth;
+    });
+
+}
+
+function GetPngPosition(iNum) {
+    let iStep = 14.7;
+    let iWidth = 61;
+    let iPosX = iWidth * iNum + iStep * iNum;
+    return [iPosX, iWidth];
+}
+
+//绘制图片
+function DrawFormulaImage(img0, params, cb) {
+    let imgObj = new Image();
+    imgObj.src = img0;
+    imgObj.onload = () => {
+        TT.ctx.drawImage(imgObj, ...params);
+        if (typeof cb == "function") {
+            cb();
+        }
+    }
 }
 
 //绘制图片
@@ -147,91 +347,6 @@ function ShowImageDlg() {
 
     dlg1.Show();
 }
-
-function SplitNumber(numA) {
-    let numAA = [];
-    let numAAS =  Array.from(numA.toString());
-    numAAS.forEach(item=>{
-        numAA.push(parseInt(item));
-    })
-
-    return numAA;
-}
-
-function CreateAfterFormula(theArr){
-    //console.log(theArr);
-    for(let i=0;i<1000;i++)
-    {
-        let arrIdx = GetRandQueueInRange(2,0, theArr.length-1);
-        let numA = theArr[arrIdx[0]];
-        let iModes = m_DictOptr[numA];   //0 本身移动  1:增加   2:减少
-        //console.log(arrIdx, numA, iModes)
-        if(iModes.length == 0) continue;
-        //获得 单个元素 所能支持的 变化
-        let idx2 = RandomInt(0, iModes.length-1);
-        let iMode = iModes[idx2];
-        if(iMode == 0){
-            //支持自身移动
-            theArr[arrIdx[0]] = GetRandQueue(m_DictSelf[numA],1)[0];
-            break;
-        }else if(iMode == 1){
-            //支持增加
-            //第二个需要支持减少
-            let numB = theArr[arrIdx[1]];
-            let iModes2 = m_DictOptr[numB];
-            if(iModes2.includes(2) == false){
-                //不含增加 就是无效
-                continue;
-            }
-            theArr[arrIdx[0]] = GetRandQueue(m_DictPlus[numA],1)[0];
-            theArr[arrIdx[1]] = GetRandQueue(m_DictMinus[numB],1)[0];
-            break;
-        }else if(iMode == 2){
-            //支持减少
-            //第二个需要支持增加
-            let numB = theArr[arrIdx[1]];
-            let iModes2 = m_DictOptr[numB];
-            if(iModes2.includes(1) == false){
-                //不含增加 就是无效
-                continue;
-            }
-            theArr[arrIdx[0]] = GetRandQueue(m_DictMinus[numA],1)[0];
-            theArr[arrIdx[1]] = GetRandQueue(m_DictPlus[numB],1)[0];
-            break;
-        }
-    }
-}
-
-//绘制火柴棒算式
-function DrawFormula(iNums, DrawX, DrawY) {
-    iNums.forEach(iNum => {
-        if (iNum < 0) iNum = -iNum;
-        let [iPosX1, iWidth1] = GetPngPosition(iNum);
-        DrawFormulaImage(png1, [iPosX1, 0, iWidth1, 100, DrawX, DrawY, iWidth1, 100], null);
-        DrawX += iWidth1;
-    });
-
-}
-
-function GetPngPosition(iNum) {
-    let iStep = 14.7;
-    let iWidth = 61;
-    let iPosX = iWidth * iNum + iStep * iNum;
-    return [iPosX, iWidth];
-}
-
-//绘制图片
-function DrawFormulaImage(img0, params, cb) {
-    let imgObj = new Image();
-    imgObj.src = img0;
-    imgObj.onload = () => {
-        TT.ctx.drawImage(imgObj, ...params);
-        if (typeof cb == "function") {
-            cb();
-        }
-    }
-}
-
 
 
 
