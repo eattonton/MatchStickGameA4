@@ -665,6 +665,21 @@ function Start() {
   SetupBtnClick('btn1', function () {
     CreateA4(1);
   });
+  SetupBtnClick('btn2', function () {
+    CreateA4(2);
+  });
+  SetupBtnClick('btn3', function () {
+    CreateA4(1, 2);
+  });
+  SetupBtnClick('btn4', function () {
+    CreateA4(1, 1, 2);
+  });
+  SetupBtnClick('btn5', function () {
+    CreateA4(2, 1, 2);
+  });
+  SetupBtnClick('btn6', function () {
+    CreateA4(1, 2, 2);
+  });
 }
 function SetupCanvas(canvas) {
   // Get the device pixel ratio, falling back to 1.
@@ -717,42 +732,220 @@ function WriteText(str1, x, y, hei, scale) {
   };
 }
 var m_hard = 1;
-
+var m_mode = 1;
+var m_move = 1; //移动次数
 //生成题目
-function CreateA4(hard) {
-  console.log("create " + hard);
+function CreateA4(hard, mode, move) {
+  m_hard = hard;
+  m_mode = mode || 1;
+  m_move = move || 1;
   var toastDlg = new _ttui.Toast({
     text: "生成中"
   });
   toastDlg.Show();
   TT.ctx.fillStyle = "white";
   TT.ctx.fillRect(0, 0, TT.width, TT.height);
-  console.log(TT);
   //1.title
   WriteText("移动火柴棒", 7.5, 1.5, 1.0);
   //2.sub-title
   WriteTextsH(["班级________", "姓名________", "用时________", "得分________"], 2.5, 3.5, 0.5);
 
   //生成题目
-  var numA = (0, _math.RandomInt)(0, 9);
-  var numAA = SplitNumber(numA);
-  var numB = (0, _math.RandomInt)(0, 9);
-  var numBB = SplitNumber(numB);
-  var numC = numA + numB;
-  var numCC = SplitNumber(numC);
-  var arrOut = [].concat(_toConsumableArray(numAA), [10], _toConsumableArray(numBB), [12], _toConsumableArray(numCC));
-  //绘制公式
-  DrawFormula(arrOut, 10, 310);
-  //移动火柴棒
-  var arrNew = _toConsumableArray(arrOut);
-  CreateAfterFormula(arrNew);
-  DrawFormula(arrNew, 10, 420);
+  for (var i = 0; i < 4; i++) {
+    DrawOneLine(i);
+  }
+
   //显示
   //二维码
   DrawImage(_qr.default, function () {
     toastDlg.Close();
     ShowImageDlg();
   });
+}
+function DrawOneLine(idx) {
+  var arrOut = [];
+  if (m_mode == 1) {
+    arrOut = GenerationFormulaA();
+  } else if (m_mode == 2) {
+    arrOut = GenerationFormulaTwo();
+  }
+  var x0 = 4.5 - (arrOut.length - 5) * 0.3;
+  var y0 = 6 + idx * 6;
+  WriteText("题目 " + (idx + 1) + "：移动（ " + m_move + "）根火柴棒使下面的算式成立：", 2.5, y0 - 1.0, 0.5);
+
+  //绘制正确公式
+  // DrawFormula(arrOut, x0, y0);
+  //移动火柴棒
+  var arrNew = _toConsumableArray(arrOut);
+  CreateAfterFormula(arrNew);
+  var hei = 1.6;
+  if (arrNew.length >= 9) hei = 1.4;
+  DrawFormula(arrNew, x0, y0, 1.6);
+}
+function GenerationFormulaA() {
+  var numMax = 9;
+  if (m_hard == 2) {
+    numMax = 99;
+  }
+  var numA = (0, _math.RandomInt)(0, numMax);
+  var numAA = SplitNumber(numA);
+  var numB = (0, _math.RandomInt)(numA, numMax);
+  var numBB = SplitNumber(numB);
+  var numC = numA + numB;
+  var numCC = SplitNumber(numC);
+  var oper = (0, _math.RandomInt)(0, 1);
+  var arrOut = [];
+  if (oper == 0) {
+    //加法
+    arrOut = [].concat(_toConsumableArray(numAA), [10], _toConsumableArray(numBB), [12], _toConsumableArray(numCC));
+  } else {
+    //减法
+    arrOut = [].concat(_toConsumableArray(numCC), [11], _toConsumableArray(numBB), [12], _toConsumableArray(numAA));
+  }
+  return arrOut;
+}
+function GenerationFormulaTwo() {
+  var numMax = 9;
+  if (m_hard == 2) {
+    numMax = 99;
+  }
+  var numA = (0, _math.RandomInt)(1, numMax - 1);
+  var numAA = SplitNumber(numA);
+  var numB = (0, _math.RandomInt)(numA, numMax);
+  var numBB = SplitNumber(numB);
+  var numC = numA + numB;
+  var numCC = SplitNumber(numC);
+  var oper = (0, _math.RandomInt)(0, 3);
+  var arrOut = [];
+  if (oper == 0) {
+    var numD = (0, _math.RandomInt)(0, numC);
+    var numDD = SplitNumber(numD);
+    var numE = numC - numD;
+    var numEE = SplitNumber(numE);
+    //加法 = 加法
+    arrOut = [].concat(_toConsumableArray(numAA), [10], _toConsumableArray(numBB), [12], _toConsumableArray(numDD), [10], _toConsumableArray(numEE));
+  } else if (oper == 1) {
+    var _numD = (0, _math.RandomInt)(0, numA);
+    var _numDD = SplitNumber(_numD);
+    var _numE = numA - _numD;
+    var _numEE = SplitNumber(_numE);
+    //减法 = 加法
+    arrOut = [].concat(_toConsumableArray(numCC), [11], _toConsumableArray(numBB), [12], _toConsumableArray(_numDD), [10], _toConsumableArray(_numEE));
+  } else if (oper == 2) {
+    var _numD2 = (0, _math.RandomInt)(numC, numC + 10);
+    var _numDD2 = SplitNumber(_numD2);
+    var _numE2 = _numD2 - numC;
+    var _numEE2 = SplitNumber(_numE2);
+    //加法 = 减法
+    arrOut = [].concat(_toConsumableArray(numAA), [10], _toConsumableArray(numBB), [12], _toConsumableArray(_numDD2), [11], _toConsumableArray(_numEE2));
+  } else if (oper == 3) {
+    var _numD3 = (0, _math.RandomInt)(numA, numA + 10);
+    var _numDD3 = SplitNumber(_numD3);
+    var _numE3 = _numD3 - numA;
+    var _numEE3 = SplitNumber(_numE3);
+    //减法 = 减法
+    arrOut = [].concat(_toConsumableArray(numCC), [11], _toConsumableArray(numBB), [12], _toConsumableArray(_numDD3), [11], _toConsumableArray(_numEE3));
+  }
+  return arrOut;
+}
+function SplitNumber(numA) {
+  var numAA = [];
+  var numAAS = Array.from(numA.toString());
+  numAAS.forEach(function (item) {
+    numAA.push(parseInt(item));
+  });
+  return numAA;
+}
+function CreateAfterFormula(theArr) {
+  for (var i = 0; i < 10000; i++) {
+    var arrIdx = (0, _math.GetRandQueueInRange)(m_move * 2, 0, theArr.length - 1);
+    var flag = true;
+    for (var j = 0; j < m_move; j++) {
+      flag = MoveOneMatchStick(theArr, [arrIdx[m_move * j], arrIdx[m_move * j + 1]]);
+      if (flag == false) {
+        break;
+      }
+    }
+    if (flag) {
+      break;
+    }
+  }
+}
+function MoveOneMatchStick(theArr, arrIdx) {
+  //移动一根
+  var numA = theArr[arrIdx[0]];
+  var iModes = m_DictOptr[numA]; //0 本身移动  1:增加   2:减少
+  if (iModes.length == 0) return false;
+  //获得 单个元素 所能支持的 变化
+  var idx2 = (0, _math.RandomInt)(0, iModes.length - 1);
+  var iMode = iModes[idx2];
+  if (iMode == 0) {
+    //支持自身移动
+    theArr[arrIdx[0]] = (0, _math.GetRandQueue)(m_DictSelf[numA], 1)[0];
+    return true;
+  } else if (iMode == 1) {
+    //支持增加
+    //第二个需要支持减少
+    var numB = theArr[arrIdx[1]];
+    var iModes2 = m_DictOptr[numB];
+    if (iModes2.includes(2) == false) {
+      //不含增加 就是无效
+      return false;
+    }
+    theArr[arrIdx[0]] = (0, _math.GetRandQueue)(m_DictPlus[numA], 1)[0];
+    theArr[arrIdx[1]] = (0, _math.GetRandQueue)(m_DictMinus[numB], 1)[0];
+    return true;
+  } else if (iMode == 2) {
+    //支持减少
+    //第二个需要支持增加
+    var _numB = theArr[arrIdx[1]];
+    var _iModes = m_DictOptr[_numB];
+    if (_iModes.includes(1) == false) {
+      //不含增加 就是无效
+      return false;
+    }
+    theArr[arrIdx[0]] = (0, _math.GetRandQueue)(m_DictMinus[numA], 1)[0];
+    theArr[arrIdx[1]] = (0, _math.GetRandQueue)(m_DictPlus[_numB], 1)[0];
+    return true;
+  }
+  return false;
+}
+
+//绘制火柴棒算式
+function DrawFormula(iNums, DrawX, DrawY, Width, scale) {
+  scale = scale || 60;
+  DrawX = DrawX * scale;
+  DrawY = DrawY * scale;
+  var DrawWidth = Width * scale;
+  var DrawHeight = 100 / 60 * DrawWidth;
+  iNums.forEach(function (iNum) {
+    if (iNum < 0) iNum = -iNum;
+    var _GetPngPosition = GetPngPosition(iNum),
+      _GetPngPosition2 = _slicedToArray(_GetPngPosition, 2),
+      iPosX1 = _GetPngPosition2[0],
+      iWidth1 = _GetPngPosition2[1];
+    DrawFormulaImage(_.default, [iPosX1, 0, iWidth1, 100, DrawX, DrawY, DrawWidth, DrawHeight], null);
+    DrawX += DrawWidth;
+  });
+}
+function GetPngPosition(iNum) {
+  var iStep = 14.7;
+  var iWidth = 61;
+  var iPosX = iWidth * iNum + iStep * iNum;
+  return [iPosX, iWidth];
+}
+
+//绘制图片
+function DrawFormulaImage(img0, params, cb) {
+  var imgObj = new Image();
+  imgObj.src = img0;
+  imgObj.onload = function () {
+    var _TT$ctx;
+    (_TT$ctx = TT.ctx).drawImage.apply(_TT$ctx, [imgObj].concat(_toConsumableArray(params)));
+    if (typeof cb == "function") {
+      cb();
+    }
+  };
 }
 
 //绘制图片
@@ -777,88 +970,6 @@ function ShowImageDlg() {
     text: strImg
   });
   dlg1.Show();
-}
-function SplitNumber(numA) {
-  var numAA = [];
-  var numAAS = Array.from(numA.toString());
-  numAAS.forEach(function (item) {
-    numAA.push(parseInt(item));
-  });
-  return numAA;
-}
-function CreateAfterFormula(theArr) {
-  //console.log(theArr);
-  for (var i = 0; i < 1000; i++) {
-    var arrIdx = (0, _math.GetRandQueueInRange)(2, 0, theArr.length - 1);
-    var numA = theArr[arrIdx[0]];
-    var iModes = m_DictOptr[numA]; //0 本身移动  1:增加   2:减少
-    //console.log(arrIdx, numA, iModes)
-    if (iModes.length == 0) continue;
-    //获得 单个元素 所能支持的 变化
-    var idx2 = (0, _math.RandomInt)(0, iModes.length - 1);
-    var iMode = iModes[idx2];
-    if (iMode == 0) {
-      //支持自身移动
-      theArr[arrIdx[0]] = (0, _math.GetRandQueue)(m_DictSelf[numA], 1)[0];
-      break;
-    } else if (iMode == 1) {
-      //支持增加
-      //第二个需要支持减少
-      var numB = theArr[arrIdx[1]];
-      var iModes2 = m_DictOptr[numB];
-      if (iModes2.includes(2) == false) {
-        //不含增加 就是无效
-        continue;
-      }
-      theArr[arrIdx[0]] = (0, _math.GetRandQueue)(m_DictPlus[numA], 1)[0];
-      theArr[arrIdx[1]] = (0, _math.GetRandQueue)(m_DictMinus[numB], 1)[0];
-      break;
-    } else if (iMode == 2) {
-      //支持减少
-      //第二个需要支持增加
-      var _numB = theArr[arrIdx[1]];
-      var _iModes = m_DictOptr[_numB];
-      if (_iModes.includes(1) == false) {
-        //不含增加 就是无效
-        continue;
-      }
-      theArr[arrIdx[0]] = (0, _math.GetRandQueue)(m_DictMinus[numA], 1)[0];
-      theArr[arrIdx[1]] = (0, _math.GetRandQueue)(m_DictPlus[_numB], 1)[0];
-      break;
-    }
-  }
-}
-
-//绘制火柴棒算式
-function DrawFormula(iNums, DrawX, DrawY) {
-  iNums.forEach(function (iNum) {
-    if (iNum < 0) iNum = -iNum;
-    var _GetPngPosition = GetPngPosition(iNum),
-      _GetPngPosition2 = _slicedToArray(_GetPngPosition, 2),
-      iPosX1 = _GetPngPosition2[0],
-      iWidth1 = _GetPngPosition2[1];
-    DrawFormulaImage(_.default, [iPosX1, 0, iWidth1, 100, DrawX, DrawY, iWidth1, 100], null);
-    DrawX += iWidth1;
-  });
-}
-function GetPngPosition(iNum) {
-  var iStep = 14.7;
-  var iWidth = 61;
-  var iPosX = iWidth * iNum + iStep * iNum;
-  return [iPosX, iWidth];
-}
-
-//绘制图片
-function DrawFormulaImage(img0, params, cb) {
-  var imgObj = new Image();
-  imgObj.src = img0;
-  imgObj.onload = function () {
-    var _TT$ctx;
-    (_TT$ctx = TT.ctx).drawImage.apply(_TT$ctx, [imgObj].concat(_toConsumableArray(params)));
-    if (typeof cb == "function") {
-      cb();
-    }
-  };
 }
 },{"./res/1.png":"res/1.png","./res/qr.png":"res/qr.png","./js/twloader":"js/twloader.js","./js/math":"js/math.js","./js/ttui":"js/ttui.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
@@ -885,7 +996,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "6921" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "11154" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
