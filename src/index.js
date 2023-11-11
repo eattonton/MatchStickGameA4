@@ -11,6 +11,7 @@ TW_AddLoadEvent(Start);
 
 //游戏规则
 //全局参数
+let m_DictNumber = {0:'0',1:'1',2:'2',3:'3',4:'4',5:'5',6:'6',7:'7',8:'8',9:'9',10:'+',11:'-',12:'='};
 //移1根：=0
 let m_DictSelf = { 0: [6, 9], 2: [3], 3: [2, 5], 5: [3], 6: [9, 0],9: [6, 0]};
 //加1根：=1
@@ -108,7 +109,9 @@ function CreateA4(hard,mode,move){
     //生成题目
     for(let i=0;i<4;i++)
     {
-        DrawOneLine(i);
+        if(!DrawOneLine(i)){
+            --i;
+        }
     }
     
     //显示
@@ -126,6 +129,12 @@ function DrawOneLine(idx){
     }else if(m_mode == 2){
         arrOut = GenerationFormulaTwo();
     }
+
+    //移动火柴棒
+    let arrNew = [...arrOut];
+    CreateAfterFormula(arrNew);
+    //检查是否有效
+    if(CheckEqual(arrNew)) return false;
  
     let x0 = 4.5 - (arrOut.length - 5)*0.3;
     let y0 = 6 + idx*6;
@@ -133,12 +142,11 @@ function DrawOneLine(idx){
 
     //绘制正确公式
    // DrawFormula(arrOut, x0, y0);
-    //移动火柴棒
-    let arrNew = [...arrOut];
-    CreateAfterFormula(arrNew);
     let hei = 1.6;
     if(arrNew.length >= 9) hei=1.4;
     DrawFormula(arrNew, x0, y0, 1.6);
+
+    return true;
 }
 
 function GenerationFormulaA(){
@@ -229,7 +237,7 @@ function SplitNumber(numA) {
 }
 
 function CreateAfterFormula(theArr){
-    for(let i=0;i<10000;i++)
+    for(let i=0;i<1000;i++)
     {
         let arrIdx = GetRandQueueInRange(m_move*2,0, theArr.length-1);
         let flag = true;
@@ -346,6 +354,36 @@ function ShowImageDlg() {
     });
 
     dlg1.Show();
+}
+
+//判断等式是否成立
+function CheckEqual(arr1){
+    let strLeft = "";
+    let strRight = "";
+    let flagR = false;
+
+    for(let i=0;i<arr1.length;i++){
+        let c1 = m_DictNumber[arr1[i]];
+        
+        if(c1 == "="){
+            flagR = true;
+            continue;
+        }
+        if(!flagR)
+        {
+            strLeft += c1;
+        }
+        else
+        {
+            strRight += c1;
+        }
+    }
+
+    if(eval(strLeft) == eval(strRight)){
+        return true;
+    }
+
+    return false;
 }
 
 
