@@ -608,6 +608,24 @@ window.game = TT;
 
 //游戏规则
 //全局参数
+<<<<<<< HEAD
+=======
+var m_DictNumber = {
+  0: '0',
+  1: '1',
+  2: '2',
+  3: '3',
+  4: '4',
+  5: '5',
+  6: '6',
+  7: '7',
+  8: '8',
+  9: '9',
+  10: '+',
+  11: '-',
+  12: '='
+};
+>>>>>>> 32a1e2e3c30820c07d8fb2e261184417253c68c7
 //移1根：=0
 var m_DictSelf = {
   0: [6, 9],
@@ -752,7 +770,13 @@ function CreateA4(hard, mode, move) {
 
   //生成题目
   for (var i = 0; i < 4; i++) {
+<<<<<<< HEAD
     DrawOneLine(i);
+=======
+    if (!DrawOneLine(i)) {
+      --i;
+    }
+>>>>>>> 32a1e2e3c30820c07d8fb2e261184417253c68c7
   }
 
   //显示
@@ -769,18 +793,34 @@ function DrawOneLine(idx) {
   } else if (m_mode == 2) {
     arrOut = GenerationFormulaTwo();
   }
+<<<<<<< HEAD
+=======
+
+  //移动火柴棒
+  var arrNew = _toConsumableArray(arrOut);
+  CreateAfterFormula(arrNew);
+  //检查是否有效
+  if (CheckEqual(arrNew)) return false;
+>>>>>>> 32a1e2e3c30820c07d8fb2e261184417253c68c7
   var x0 = 4.5 - (arrOut.length - 5) * 0.3;
   var y0 = 6 + idx * 6;
   WriteText("题目 " + (idx + 1) + "：移动（ " + m_move + "）根火柴棒使下面的算式成立：", 2.5, y0 - 1.0, 0.5);
 
   //绘制正确公式
   // DrawFormula(arrOut, x0, y0);
+<<<<<<< HEAD
   //移动火柴棒
   var arrNew = _toConsumableArray(arrOut);
   CreateAfterFormula(arrNew);
   var hei = 1.6;
   if (arrNew.length >= 9) hei = 1.4;
   DrawFormula(arrNew, x0, y0, 1.6);
+=======
+  var hei = 1.6;
+  if (arrNew.length >= 9) hei = 1.4;
+  DrawFormula(arrNew, x0, y0, 1.6);
+  return true;
+>>>>>>> 32a1e2e3c30820c07d8fb2e261184417253c68c7
 }
 function GenerationFormulaA() {
   var numMax = 9;
@@ -857,7 +897,11 @@ function SplitNumber(numA) {
   return numAA;
 }
 function CreateAfterFormula(theArr) {
+<<<<<<< HEAD
   for (var i = 0; i < 10000; i++) {
+=======
+  for (var i = 0; i < 1000; i++) {
+>>>>>>> 32a1e2e3c30820c07d8fb2e261184417253c68c7
     var arrIdx = (0, _math.GetRandQueueInRange)(m_move * 2, 0, theArr.length - 1);
     var flag = true;
     for (var j = 0; j < m_move; j++) {
@@ -971,6 +1015,32 @@ function ShowImageDlg() {
   });
   dlg1.Show();
 }
+<<<<<<< HEAD
+=======
+
+//判断等式是否成立
+function CheckEqual(arr1) {
+  var strLeft = "";
+  var strRight = "";
+  var flagR = false;
+  for (var i = 0; i < arr1.length; i++) {
+    var c1 = m_DictNumber[arr1[i]];
+    if (c1 == "=") {
+      flagR = true;
+      continue;
+    }
+    if (!flagR) {
+      strLeft += c1;
+    } else {
+      strRight += c1;
+    }
+  }
+  if (eval(strLeft) == eval(strRight)) {
+    return true;
+  }
+  return false;
+}
+>>>>>>> 32a1e2e3c30820c07d8fb2e261184417253c68c7
 },{"./res/1.png":"res/1.png","./res/qr.png":"res/qr.png","./js/twloader":"js/twloader.js","./js/math":"js/math.js","./js/ttui":"js/ttui.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -996,7 +1066,11 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+<<<<<<< HEAD
   var ws = new WebSocket(protocol + '://' + hostname + ':' + "11154" + '/');
+=======
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "8805" + '/');
+>>>>>>> 32a1e2e3c30820c07d8fb2e261184417253c68c7
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
