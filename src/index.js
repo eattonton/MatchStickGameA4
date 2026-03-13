@@ -134,7 +134,9 @@ function DrawOneLine(idx) {
     //检查是否有效
     if (m_hard ==1 && CheckEqual(arrNew)) return false;
     //检查步数
-    if (!CheckStepNum(arrOut, arrNew)) return false;
+    if (!CheckStepNum(arrOut, arrNew) || !CheckValid(arrOut, arrNew)) {
+        return false;
+    }
     let x0 = 4.5 - (arrOut.length - 5) * 0.3;
     let y0 = 6 + idx * 6;
     WriteText("题目 "+(idx+1)+"：移动（ "+m_move+"）根火柴棒使下面的算式成立：", 2.5, y0-1.0, 0.5);
@@ -373,11 +375,14 @@ function CheckEqual(arr1) {
             strRight += c1;
         }
     }
+    try{
+        if (eval(strLeft) == eval(strRight)) {
+            return true;
+        }
+    }catch(err){
 
-    if (eval(strLeft) == eval(strRight)) {
-        return true;
     }
-
+    
     return false;
 }
 
@@ -411,6 +416,38 @@ function CheckStepNum(arr1, arr2) {
     }
     if ((stepSelf + stepPlus) != m_move) {
         return false;
+    }
+    return true;
+}
+
+//排除一些 无效的等式
+function CheckValid(arr1, arr2){
+    if (arr1.length != arr2.length) return false;
+    if(m_move == 1) return true;
+    //两边完全相等
+    let isSame=true;
+    for (let i = 0; i < arr1.length; i++) {
+        if (arr1[i] != arr2[i]) {
+            isSame = false;
+            break;
+        }
+    }
+    if(isSame) return false;
+    //74-7=1
+    let inValidEqs = [[7,4,11,7,12,1],[7,11,4,12,7,11,4],[7,11,4,12,4,11,7]
+            ,[4,11,7,12,7,11,4],[4,11,7,12,4,11,7]];
+    for (let i = 0; i < inValidEqs.length; i++) {
+        let arr3 = inValidEqs[i];
+        if(arr2.length == arr3.length){
+            isSame = true;
+            for(let j=0;j<arr2.length;j++){
+                if(arr2[j] != arr3[j]){
+                    isSame = false;
+                    break;
+                }
+            }
+            if(isSame) return false;
+        }
     }
     return true;
 }
