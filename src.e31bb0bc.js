@@ -792,7 +792,9 @@ function DrawOneLine(idx) {
   //检查是否有效
   if (m_hard == 1 && CheckEqual(arrNew)) return false;
   //检查步数
-  if (!CheckStepNum(arrOut, arrNew)) return false;
+  if (!CheckStepNum(arrOut, arrNew) || !CheckValid(arrOut, arrNew)) {
+    return false;
+  }
   var x0 = 4.5 - (arrOut.length - 5) * 0.3;
   var y0 = 6 + idx * 6;
   WriteText("题目 " + (idx + 1) + "：移动（ " + m_move + "）根火柴棒使下面的算式成立：", 2.5, y0 - 1.0, 0.5);
@@ -1012,9 +1014,11 @@ function CheckEqual(arr1) {
       strRight += c1;
     }
   }
-  if (eval(strLeft) == eval(strRight)) {
-    return true;
-  }
+  try {
+    if (eval(strLeft) == eval(strRight)) {
+      return true;
+    }
+  } catch (err) {}
   return false;
 }
 
@@ -1048,6 +1052,37 @@ function CheckStepNum(arr1, arr2) {
   }
   if (stepSelf + stepPlus != m_move) {
     return false;
+  }
+  return true;
+}
+
+//排除一些 无效的等式
+function CheckValid(arr1, arr2) {
+  if (arr1.length != arr2.length) return false;
+  if (m_move == 1) return true;
+  //两边完全相等
+  var isSame = true;
+  for (var i = 0; i < arr1.length; i++) {
+    if (arr1[i] != arr2[i]) {
+      isSame = false;
+      break;
+    }
+  }
+  if (isSame) return false;
+  //74-7=1
+  var inValidEqs = [[7, 4, 11, 7, 12, 1], [7, 11, 4, 12, 7, 11, 4], [7, 11, 4, 12, 4, 11, 7], [4, 11, 7, 12, 7, 11, 4], [4, 11, 7, 12, 4, 11, 7]];
+  for (var _i2 = 0; _i2 < inValidEqs.length; _i2++) {
+    var arr3 = inValidEqs[_i2];
+    if (arr2.length == arr3.length) {
+      isSame = true;
+      for (var j = 0; j < arr2.length; j++) {
+        if (arr2[j] != arr3[j]) {
+          isSame = false;
+          break;
+        }
+      }
+      if (isSame) return false;
+    }
   }
   return true;
 }
@@ -1098,7 +1133,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "10425" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "3827" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
